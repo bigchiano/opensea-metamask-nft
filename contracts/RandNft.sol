@@ -2,46 +2,54 @@
 
 pragma solidity =0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract RandNft is ERC1155 {
+contract RandNft is ERC721 {
     using SafeMath for uint256;
+    using Strings for uint256;
 
-    constructor() ERC1155("https://randnfts.herokuapp.com/nft-api/") {}
-
+    string private _uri;
     uint256 public cards;
-    mapping(uint256 => uint256) public totalSupply;
-    mapping(uint256 => uint256) public circulatingSupply;
 
-    event CardAdded(uint256 id, uint256 maxSupply);
-    event MintNft(address to, uint256 id, uint256 amount);
-    event BurnNft(address from, uint256 id, uint256 amount);
+    event MintNft(address to, uint256 id);
+    event BurnNft(address from, uint256 id);
 
-    function addCard(uint256 maxSupply) public returns (uint256) {
-        require(maxSupply > 0, "Maximum supply can not be 0");
-        cards = cards.add(1);
-        totalSupply[cards] = maxSupply;
-        emit CardAdded(cards, maxSupply);
-        return cards;
+    constructor() ERC721("Rand Nft", "RNT") {
+        setURI("https://randnfts.herokuapp.com/nft-api/");
+    }
+
+        function _baseURI() internal view virtual override returns (string memory) {
+        return _uri;
+    }
+
+    function uri(uint256) public view virtual returns (string memory) {
+        return _uri;
+    }
+
+    function setURI(string memory newuri) public {
+        _uri = newuri;
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0
+            ? string(abi.encodePacked(baseURI, tokenId.toString()))
+            : '';
     }
 
     function mint(
         address to,
-        uint256 id,
-        uint256 amount
+        uint256 id
     ) public {
-        require(
-            circulatingSupply[id].add(amount) <= totalSupply[id],
-            "Total supply reached."
-        );
-        circulatingSupply[id] = circulatingSupply[id].add(amount);
-        _mint(to, id, amount, "");
-        emit MintNft(to, id, amount);
+        _mint(to, id);
+        emit MintNft(to, id);
     }
 
-    function burn(uint256 id, uint256 amount) public {
-        _burn(_msgSender(), id, amount);
-        emit BurnNft(_msgSender(), id, amount);
+    function burn(uint256 id) public {
+        _burn(id);
+        emit BurnNft(_msgSender(), id);
     }
 }
