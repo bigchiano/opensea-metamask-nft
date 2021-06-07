@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const fs = require('fs');
 
 app.get('/nft-api/:id', (req, res) => {
@@ -20,7 +20,7 @@ app.get('/add-nft/:id', (req, res) => {
     data[newId] = newData;
     data.nftCounts = data.nftCounts++
     fs.writeFileSync("data.json", JSON.stringify(data));
-    
+
     res.send(data);
 })
 

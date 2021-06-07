@@ -5,10 +5,10 @@ pragma solidity =0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract ZumaNFT is ERC1155 {
+contract RandNft is ERC1155 {
     using SafeMath for uint256;
 
-    constructor() ERC1155("https://www.ochukochris.com/nft-api/") {}
+    constructor() ERC1155("https://randnfts.herokuapp.com/nft-api/") {}
 
     uint256 public cards;
     mapping(uint256 => uint256) public totalSupply;
